@@ -17,34 +17,32 @@ namespace Task1
 
 
             if (arrClass.Length > 1 && result != null)
-            {
-                // Сложность O(n^2) можно оптимизировать но честно говоря нет времени обдумывать
-                for (int i = 1; i < arrClass.Length; i++)
-                {
-                    string[] fieldPair = arrClass[i].Split(':');
-                    var fields = result.GetType().GetFields();
-
-                    if (fields.Length > 0)
-                    {
-                        foreach (var field in fields)
-                        {
-                            var attr = field.GetCustomAttribute<CustomNameAttribute>();
-                            if (attr?.Name == fieldPair[0])
-                            {
-                                if (field.FieldType == typeof(int))
-                                    field.SetValue(result, int.Parse(fieldPair[1]));
-                            }
-                        }
-                    }
-                    else
-                        break;
-
-                }
-
+            { 
                 for (int i = 1; i < arrClass.Length; i++)
                 {
                     string[] propsPair = arrClass[i].Split(':');
-                    var prop = result.GetType().GetProperty(propsPair[0]);                    
+                    var prop = result.GetType().GetProperty(propsPair[0]);
+
+                    if ( prop == null)
+                    {
+                        var fields = result.GetType().GetFields();
+                        if (fields.Length > 0)
+                        {
+                            foreach (var field in fields)
+                            {
+                                var attr = field.GetCustomAttribute<CustomNameAttribute>();
+                                if (attr?.Name == propsPair[0])
+                                {
+                                    if (field.FieldType == typeof(int))
+                                    {
+                                        field.SetValue(result, int.Parse(propsPair[1]));
+                                        break;
+                                    }
+                                        
+                                }
+                            }
+                        }
+                    }
 
                     if (prop?.PropertyType == typeof(int))
                         prop.SetValue(result, int.Parse(propsPair[1]));
@@ -54,6 +52,7 @@ namespace Task1
                         prop.SetValue(result, decimal.Parse(propsPair[1]));
                     else if (prop?.PropertyType == typeof(char[]))
                         prop.SetValue(result, propsPair[1].ToCharArray());
+                    
                 }
             }
 
